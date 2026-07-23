@@ -1,2 +1,2 @@
 # parry-dis
-A GMTK game jam entry.
+A 2026 GMTK game jam entry.

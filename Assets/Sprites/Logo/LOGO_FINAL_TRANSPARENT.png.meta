@@ -1,0 +1,280 @@
+fileFormatVersion: 2
+guid: c6941cf212c770d489b5bfb6bda72033
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 4716794170263053966
+    second: LOGO_FINAL_TRANSPARENT_0
+  - first:
+      213: 8451140946426441635
+    second: LOGO_FINAL_TRANSPARENT_1
+  - first:
+      213: 4366239206403549223
+    second: LOGO_FINAL_TRANSPARENT_2
+  - first:
+      213: -680728208524807322
+    second: LOGO_FINAL_TRANSPARENT_3
+  - first:
+      213: -9124782826440405480
+    second: LOGO_FINAL_TRANSPARENT_4
+  - first:
+      213: 7208186786702131507
+    second: LOGO_FINAL_TRANSPARENT_5
+  - first:
+      213: 6503713457806592160
+    second: LOGO_FINAL_TRANSPARENT_6
+  - first:
+      213: 2963781619865480763
+    second: LOGO_FINAL_TRANSPARENT_7
+  - first:
+      213: -8474610266067166409
+    second: LOGO_FINAL_TRANSPARENT_8
+  - first:
+      213: 3678657636708393628
+    second: LOGO_FINAL_TRANSPARENT_9
+  - first:
+      213: 3303524564631530074
+    second: LOGO_FINAL_TRANSPARENT_10
+  - first:
+      213: -645310864633084759
+    second: LOGO_FINAL_TRANSPARENT_11
+  - first:
+      213: -1029399424300095844
+    second: LOGO_FINAL_TRANSPARENT_12
+  - first:
+      213: 414179698938600818
+    second: LOGO_FINAL_TRANSPARENT_13
+  - first:
+      213: 5743311676808169171
+    second: LOGO_FINAL_TRANSPARENT_14
+  - first:
+      213: -1359840783262005600
+    second: LOGO_FINAL_TRANSPARENT_15
+  - first:
+      213: -6187795253410715854
+    second: LOGO_FINAL_TRANSPARENT_16
+  - first:
+      213: 8020539014135809993
+    second: LOGO_FINAL_TRANSPARENT_17
+  - first:
+      213: -1492253015968040517
+    second: LOGO_FINAL_TRANSPARENT_18
+  - first:
+      213: -5048023177984389245
+    second: LOGO_FINAL_TRANSPARENT_19
+  - first:
+      213: -253726440514601478
+    second: LOGO_FINAL_TRANSPARENT_20
+  - first:
+      213: 1393003188993892200
+    second: LOGO_FINAL_TRANSPARENT_21
+  - first:
+      213: 4978251866353815705
+    second: LOGO_FINAL_TRANSPARENT_22
+  - first:
+      213: 1043451827438957266
+    second: LOGO_FINAL_TRANSPARENT_23
+  - first:
+      213: 655844105514736275
+    second: LOGO_FINAL_TRANSPARENT_24
+  - first:
+      213: -2808642562951401093
+    second: LOGO_FINAL_TRANSPARENT_25
+  - first:
+      213: 7948883269003793040
+    second: LOGO_FINAL_TRANSPARENT_26
+  - first:
+      213: -2588532857002500485
+    second: LOGO_FINAL_TRANSPARENT_27
+  - first:
+      213: 1776977796701136806
+    second: LOGO_FINAL_TRANSPARENT_28
+  - first:
+      213: 4016351586493488945
+    second: LOGO_FINAL_TRANSPARENT_29
+  - first:
+      213: 8674854019278370898
+    second: LOGO_FINAL_TRANSPARENT_30
+  - first:
+      213: 2681284978486239847
+    second: LOGO_FINAL_TRANSPARENT_31
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: LOGO_FINAL_TRANSPARENT
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 1080
+        height: 1080
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e86a925ae4b657140800000000000000
+      internalID: 4716794170263053966
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 040ffabacf00195499e4a7ee7c2d62b5
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      LOGO_FINAL_TRANSPARENT: 4716794170263053966
+      LOGO_FINAL_TRANSPARENT_1: 8451140946426441635
+      LOGO_FINAL_TRANSPARENT_10: 3303524564631530074
+      LOGO_FINAL_TRANSPARENT_11: -645310864633084759
+      LOGO_FINAL_TRANSPARENT_12: -1029399424300095844
+      LOGO_FINAL_TRANSPARENT_13: 414179698938600818
+      LOGO_FINAL_TRANSPARENT_14: 5743311676808169171
+      LOGO_FINAL_TRANSPARENT_15: -1359840783262005600
+      LOGO_FINAL_TRANSPARENT_16: -6187795253410715854
+      LOGO_FINAL_TRANSPARENT_17: 8020539014135809993
+      LOGO_FINAL_TRANSPARENT_18: -1492253015968040517
+      LOGO_FINAL_TRANSPARENT_19: -5048023177984389245
+      LOGO_FINAL_TRANSPARENT_2: 4366239206403549223
+      LOGO_FINAL_TRANSPARENT_20: -253726440514601478
+      LOGO_FINAL_TRANSPARENT_21: 1393003188993892200
+      LOGO_FINAL_TRANSPARENT_22: 4978251866353815705
+      LOGO_FINAL_TRANSPARENT_23: 1043451827438957266
+      LOGO_FINAL_TRANSPARENT_24: 655844105514736275
+      LOGO_FINAL_TRANSPARENT_25: -2808642562951401093
+      LOGO_FINAL_TRANSPARENT_26: 7948883269003793040
+      LOGO_FINAL_TRANSPARENT_27: -2588532857002500485
+      LOGO_FINAL_TRANSPARENT_28: 1776977796701136806
+      LOGO_FINAL_TRANSPARENT_29: 4016351586493488945
+      LOGO_FINAL_TRANSPARENT_3: -680728208524807322
+      LOGO_FINAL_TRANSPARENT_30: 8674854019278370898
+      LOGO_FINAL_TRANSPARENT_31: 2681284978486239847
+      LOGO_FINAL_TRANSPARENT_4: -9124782826440405480
+      LOGO_FINAL_TRANSPARENT_5: 7208186786702131507
+      LOGO_FINAL_TRANSPARENT_6: 6503713457806592160
+      LOGO_FINAL_TRANSPARENT_7: 2963781619865480763
+      LOGO_FINAL_TRANSPARENT_8: -8474610266067166409
+      LOGO_FINAL_TRANSPARENT_9: 3678657636708393628
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

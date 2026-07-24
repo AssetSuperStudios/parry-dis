@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 1371498009773147675}
   - component: {fileID: 7337818933585934533}
   - component: {fileID: -4300404784388095650}
+  - component: {fileID: 3755835999813179447}
   m_Layer: 0
   m_Name: Enemy_0
   m_TagString: Untagged
@@ -27,7 +28,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5981756505589954718}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -6, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -132,5 +133,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f6fb44dd7dd5064ab794477213b3c85, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
-  _bulletPrefab: {fileID: 0}
+  _bulletPrefab: {fileID: 2711734153107628613, guid: 389fa1779acc4d6478c5c7d52bcfab6c, type: 3}
   bulletInterval: 3
+  _offset: {fileID: 0}
+--- !u!95 &3755835999813179447
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5981756505589954718}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: bd9e2d0c210fa6b4b9648eefa250f3ab, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class Enemy : MonoBehaviour
@@ -11,10 +12,14 @@ public class Enemy : MonoBehaviour
     float bulletInterval = 3.0f;
     [SerializeField] 
     private Transform _offset;
+    private Animator enemyAnimator;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        // Fetch the Enemy's Animator component
+        enemyAnimator = GetComponent<Animator>();
+
         _bulletFiring = StartCoroutine(BulletFiring());
     }
 
@@ -29,9 +34,19 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    void FireBullet()
+    async Task FireBullet()
     {
+        // Start the long range animation
+        enemyAnimator.SetTrigger("isLRange");
+        await Awaitable.WaitForSecondsAsync(0.2f);
+
         Instantiate(_bulletPrefab, _offset.position, transform.rotation);
+    }
+
+    void MeleeAttack()
+    {
+        // Start the tp melee animation
+        enemyAnimator.SetTrigger("isTPMelee");
     }
 
     private void DisableBulletFire()

@@ -11,11 +11,13 @@ public class Player : MonoBehaviour
     private float perfectParryRadius = 1.5f;
     [SerializeField]
     private float parryRadius = 2.1f;
+    private Animator playerAnimator;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        // Fetch the Player's Animator component
+        playerAnimator = GetComponent<Animator>();
     }
 
     // Update is called once per frame
@@ -29,6 +31,9 @@ public class Player : MonoBehaviour
 
     void TryParry()
     {
+        // Start the parry animation
+        playerAnimator.SetTrigger("isParry");
+
         // 1. Check the smaller circle first (Perfect Parry)
         Collider2D[] perfectHits = Physics2D.OverlapCircleAll(transform.position, perfectParryRadius, bulletLayer);
         

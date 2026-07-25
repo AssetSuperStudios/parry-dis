@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections;
 
 public class Player : MonoBehaviour
 {
@@ -12,6 +13,8 @@ public class Player : MonoBehaviour
     [SerializeField]
     private float parryRadius = 2.1f;
     private Animator playerAnimator;
+    [SerializeField]
+    private float parryDelayMS = 200f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -25,15 +28,22 @@ public class Player : MonoBehaviour
     {
         if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
         {
-            TryParry();
+            StartCoroutine(ParryDelay());
         }
     }
 
-    void TryParry()
+    IEnumerator ParryDelay()
     {
         // Start the parry animation
         playerAnimator.SetTrigger("isParry");
 
+        yield return new WaitForSeconds(parryDelayMS/1000f); 
+
+        TryParry();
+    }
+
+    void TryParry()
+    {
         // 1. Check the smaller circle first (Perfect Parry)
         Collider2D[] perfectHits = Physics2D.OverlapCircleAll(transform.position, perfectParryRadius, bulletLayer);
         

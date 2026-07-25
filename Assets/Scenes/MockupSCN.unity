@@ -770,6 +770,10 @@ PrefabInstance:
       propertyPath: perfectParryRadius
       value: 1.1
       objectReference: {fileID: 0}
+    - target: {fileID: 1949378574373486857, guid: db219e36e567f0a4896344aadb513f1e, type: 3}
+      propertyPath: m_UpdateMode
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3188938679922940625, guid: db219e36e567f0a4896344aadb513f1e, type: 3}
       propertyPath: m_Sprite
       value: 

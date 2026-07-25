@@ -20,14 +20,4 @@ public class Bullet : MonoBehaviour
     {
         transform.Translate(Vector2.right * movementSpeed * Time.deltaTime);
     }
-
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        // Debug.Log("Collision.");
-        if (collision.GetComponent<Player>())
-        {
-            Destroy(gameObject);
-            Debug.Log("Player hit.");
-        }
-    }
 }

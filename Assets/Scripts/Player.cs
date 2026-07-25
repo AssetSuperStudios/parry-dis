@@ -1,52 +1,53 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
+using System.Collections.Generic; // Added for tracking processed bullets
 using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
     public LayerMask bulletLayer;
     private Animator playerAnimator;
+    private SpriteRenderer spriteRenderer;
+    public Transform playerTransform;
 
-    [Header("Parry")]
-    [SerializeField]
-    public KeyCode parryKey = KeyCode.Space;
-    [SerializeField]
-    private float safeParryRadius = 1f;
-    [SerializeField]
-    private float perfectParryRadius = 1.3f;
-    [SerializeField]
-    private float parryRadius = 2f;
-    [SerializeField]
-    private float parryDelayMS = 210f;
+    [Header("Parry Hierarchy Sizes")]
+    [Tooltip("Smallest Circle (Inner Core)")]
+    [SerializeField] private float safeParryRadius = 1.0f;
+    [Tooltip("Middle Circle (Sweet Spot)")]
+    [SerializeField] private float perfectParryRadius = 1.4f;
+    [Tooltip("Largest Circle (Outer Edge)")]
+    [SerializeField] private float parryRadius = 2.0f;
+    
+    [SerializeField] private float parryDelayMS = 190f;
 
     [Header("Hurt Blinking Settings")]
-    [SerializeField] 
-    private int blinkCount = 4;          // How many times the sprite flashes
-    [SerializeField] 
-    private float blinkIntervalMs = 100f; // Speed of each flash (e.g., 100ms on, 100ms off)
+    [SerializeField] private int blinkCount = 4;          
+    [SerializeField] private float blinkIntervalMs = 100f; 
 
     [Header("UI Feedback")]
-    [SerializeField] 
-    private Text feedbackText; // Drag your Legacy Text GameObject here
-    [SerializeField] 
-    private float textDisplayDuration = 0.5f;
+    [SerializeField] private Text feedbackText; 
+    [SerializeField] private float textDisplayDuration = 0.5f;
 
-    private SpriteRenderer spriteRenderer;
+    private bool isParrying = false;
+    private bool isInvincible = false;
+    private Vector3 offsetPosition;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        // Fetch the Player's Animator component
         playerAnimator = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
-        // Clear the legacy text on game startup
         if (feedbackText != null) feedbackText.text = ""; 
+
+        if (playerTransform == null) playerTransform = this.transform;
+
+        offsetPosition = transform.position + new Vector3(0, 0.2f, 0);
     }
 
-    // Update is called once per frame
     void Update()
     {
+        if (isParrying) return;
+
         if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
         {
             StartCoroutine(ParryDelay());
@@ -55,69 +56,92 @@ public class Player : MonoBehaviour
 
     IEnumerator ParryDelay()
     {
-        // Start the parry animation
+        isParrying = true;
         playerAnimator.SetTrigger("isParry");
 
-        yield return new WaitForSeconds(parryDelayMS/1000f); 
+        float delayInSeconds = parryDelayMS / 1000f;
+        int physicsFramesToWait = Mathf.RoundToInt(delayInSeconds / Time.fixedDeltaTime);
+
+        for (int i = 0; i < physicsFramesToWait; i++)
+        {
+            yield return new WaitForFixedUpdate();
+        }
 
         TryParry();
+
+        yield return new WaitForSeconds(0.1f);
+        isParrying = false;
     }
 
     void TryParry()
     {
-        // 1. Check the smaller circle first (Perfect Parry)
-        Collider2D[] safeHits = Physics2D.OverlapCircleAll(transform.position, safeParryRadius, bulletLayer);
-        
-        if (safeHits.Length > 0)
+
+        // Gather bullets in all radiuses
+        Collider2D[] safeHits = Physics2D.OverlapCircleAll(offsetPosition, safeParryRadius, bulletLayer);
+        Collider2D[] perfectHits = Physics2D.OverlapCircleAll(offsetPosition, perfectParryRadius, bulletLayer);
+        Collider2D[] normalHits = Physics2D.OverlapCircleAll(offsetPosition, parryRadius, bulletLayer);
+
+        // This list tracks bullets we already destroyed so outer loops don't double-count them
+        List<GameObject> processedBullets = new List<GameObject>();
+
+        // 1. FIRST PRIORITY: SAFE PARRY (Smallest Circle)
+        int safeCount = 0;
+        foreach (Collider2D hit in safeHits)
         {
-            int safeParryCount = 0;
-            foreach (Collider2D hit in safeHits)
+            if (hit != null && hit.gameObject != null)
             {
+                processedBullets.Add(hit.gameObject);
                 Destroy(hit.gameObject);
-                safeParryCount++;
+                safeCount++;
             }
+        }
+
+        // 2. SECOND PRIORITY: PERFECT PARRY (Middle Circle)
+        int perfectCount = 0;
+        foreach (Collider2D hit in perfectHits)
+        {
+            if (hit != null && hit.gameObject != null && !processedBullets.Contains(hit.gameObject))
+            {
+                processedBullets.Add(hit.gameObject);
+                Destroy(hit.gameObject);
+                perfectCount++;
+            }
+        }
+
+        // 3. THIRD PRIORITY: GOOD/NORMAL PARRY (Largest Circle)
+        int normalCount = 0;
+        foreach (Collider2D hit in normalHits)
+        {
+            if (hit != null && hit.gameObject != null && !processedBullets.Contains(hit.gameObject))
+            {
+                processedBullets.Add(hit.gameObject);
+                Destroy(hit.gameObject);
+                normalCount++;
+            }
+        }
+
+        // --- DISPLAY UI FEEDBACK BASED ON HIGHEST TIER TRIGGERED ---
+        if (safeCount > 0)
+        {
             ShowFeedbackText("SAFE PARRY!", Color.red);
-            Debug.Log($"Safe Parry: {safeParryCount}");
+            Debug.Log($"Safe Parry: {safeCount}");
         }
-
-        // 1. Check the smaller circle first (Perfect Parry)
-        Collider2D[] perfectHits = Physics2D.OverlapCircleAll(transform.position, perfectParryRadius, bulletLayer);
-        
-        if (perfectHits.Length > 0)
+        else if (perfectCount > 0)
         {
-            int perfectParryCount = 0;
-            foreach (Collider2D hit in perfectHits)
-            {
-                if (hit != null && hit.gameObject != null)
-                {
-                    Destroy(hit.gameObject);
-                    perfectParryCount++;
-                }
-            }
             ShowFeedbackText("PERFECT PARRY!", Color.yellow);
-            Debug.Log($"Perfect Parry: {perfectParryCount}");
+            Debug.Log($"Perfect Parry: {perfectCount}");
         }
-
-        Collider2D[] normalHits = Physics2D.OverlapCircleAll(transform.position, parryRadius, bulletLayer);
-        
-        if (normalHits.Length > 0)
+        else if (normalCount > 0)
         {
-            int parryCount = 0;
-            foreach (Collider2D hit in normalHits)
-            {
-                if (hit != null && hit.gameObject != null)
-                {
-                    Destroy(hit.gameObject);
-                    parryCount++;
-                }
-            }
-            ShowFeedbackText("PARRY!", Color.orange);
-            Debug.Log($"Parry: {parryCount}");
+            ShowFeedbackText("GOOD PARRY!", Color.orange);
+            Debug.Log($"Good Parry: {normalCount}");
         }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        if (isInvincible) return;
+
         if ((bulletLayer.value & (1 << collision.gameObject.layer)) != 0)
         {
             ProcessFail(collision.gameObject);
@@ -128,41 +152,34 @@ public class Player : MonoBehaviour
     {
         Destroy(bullet);
         Debug.Log("Player hit.");
-
-        // Start the visual blinking effect
         StartCoroutine(HurtBlinkRoutine());
     }
 
     IEnumerator HurtBlinkRoutine()
     {
+        isInvincible = true;
         float delayInSeconds = blinkIntervalMs / 1000f;
 
-        // Loop for the designated number of blinks
         for (int i = 0; i < blinkCount; i++)
         {
-            // Turn the sprite off (invisible)
             spriteRenderer.enabled = false;
             yield return new WaitForSeconds(delayInSeconds);
 
-            // Turn the sprite back on (visible)
             spriteRenderer.enabled = true;
             yield return new WaitForSeconds(delayInSeconds);
         }
 
-        // Safety check to ensure the sprite isn't left invisible when finished
         spriteRenderer.enabled = true; 
+        isInvincible = false;
     }
 
     void ShowFeedbackText(string message, Color textColor)
     {
         if (feedbackText == null) return;
 
-        // Interrupt any lingering text clear timers so text updates instantly
         StopCoroutine("ClearTextRoutine");
-        
         feedbackText.text = message;
         feedbackText.color = textColor;
-
         StartCoroutine(ClearTextRoutine());
     }
 
@@ -170,5 +187,20 @@ public class Player : MonoBehaviour
     {
         yield return new WaitForSeconds(textDisplayDuration);
         feedbackText.text = ""; 
+    }
+
+    private void OnDrawGizmosSelected()
+    {       
+        // Red is inner core (Safe)
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(offsetPosition, safeParryRadius);
+        
+        // Yellow is middle sweet spot (Perfect)
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(offsetPosition, perfectParryRadius);
+        
+        // Orange is outer safety rim (Good)
+        Gizmos.color = new Color(1f, 0.5f, 0f); // Orange
+        Gizmos.DrawWireSphere(offsetPosition, parryRadius);
     }
 }

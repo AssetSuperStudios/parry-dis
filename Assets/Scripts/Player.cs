@@ -16,13 +16,13 @@ public class Player : MonoBehaviour
 
     [Header("Parry Hierarchy Sizes")]
     [Tooltip("Smallest Circle (Inner Core)")]
-    [SerializeField] private float safeParryRadius = 0.8f;
+    [SerializeField] private float safeParryRadius = 0.7f;
     [Tooltip("Middle Circle (Sweet Spot)")]
-    [SerializeField] private float perfectParryRadius = 1.3f;
+    [SerializeField] private float perfectParryRadius = 1.4f;
     [Tooltip("Largest Circle (Outer Edge)")]
-    [SerializeField] private float parryRadius = 1.8f;
+    [SerializeField] private float parryRadius = 1.9f;
     
-    [SerializeField] private float parryDelayMS = 80f;
+    [SerializeField] private float parryDelayMS = 90f;
 
     [Header("Hurt Blinking Settings")]
     [SerializeField] private int blinkCount = 4;          

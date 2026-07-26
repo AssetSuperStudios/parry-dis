@@ -48,6 +48,7 @@ public class Player : MonoBehaviour
     private bool isInvincible = false;
     private Vector3 offsetPosition;
     private int hpCounter = 3;
+    private AudioSource[] audioSources;
 
     private bool registeredParryHitInWindow = false;
 
@@ -66,6 +67,7 @@ public class Player : MonoBehaviour
         playerAnimator = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         canvasGroup = feedbackText.GetComponent<CanvasGroup>();
+        audioSources = GetComponents<AudioSource>();
         if (feedbackText != null) feedbackText.text = ""; 
 
         if (playerTransform == null) playerTransform = this.transform;
@@ -135,6 +137,7 @@ public class Player : MonoBehaviour
 
         if (!registeredParryHitInWindow)
         {
+            audioSources[2].Play();
             ShowFeedbackText("Miss!", Color.white, canvasGroup);
             if (score != null)
             {
@@ -233,6 +236,7 @@ public class Player : MonoBehaviour
 
     void ExecuteParryHit(Collider2D hit)
     {
+        audioSources[1].Play();
         if ((bulletLayer.value & (1 << hit.gameObject.layer)) != 0) 
         {
             hit.gameObject.SetActive(false); 
@@ -274,7 +278,8 @@ public class Player : MonoBehaviour
         }
         
         hpCounter--;
-        GetComponent<AudioSource>().Play();
+        audioSources[0].Play();
+        // Play player_hurt
         
         switch (hpCounter)
         {

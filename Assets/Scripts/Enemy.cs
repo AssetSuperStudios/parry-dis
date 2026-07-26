@@ -20,6 +20,7 @@ public class Enemy : MonoBehaviour
     private Animator enemyAnimator;
     private Transform enemyTransform;
     private Collider2D enemyCollider;
+    private AudioSource[] audioSources;
     
     // Cancellation token to safely stop the loop when the GameObject is destroyed
     private CancellationTokenSource _loopCancellationTokenSource;
@@ -29,6 +30,7 @@ public class Enemy : MonoBehaviour
         enemyAnimator = GetComponent<Animator>();
         enemyTransform = GetComponent<Transform>();
         enemyCollider = GetComponent<Collider2D>();
+        audioSources = GetComponents<AudioSource>();
 
         moveCount = 10;
         MoveCounter(moveCount);
@@ -61,10 +63,13 @@ public class Enemy : MonoBehaviour
 
                 if (randomNumber == 0) 
                 {
+                    audioSources[1].Play();
+                    audioSources[2].PlayDelayed(0.3f);
                     await MeleeAttack(token);
                 } 
                 else 
                 {
+                    audioSources[0].Play();
                     await FireBullet(token);
                 }
                 

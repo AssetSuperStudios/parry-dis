@@ -534,6 +534,7 @@ GameObject:
   - component: {fileID: 698047977}
   - component: {fileID: 698047979}
   - component: {fileID: 698047978}
+  - component: {fileID: 698047980}
   m_Layer: 5
   m_Name: TextScore
   m_TagString: Untagged
@@ -602,6 +603,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 698047976}
   m_CullTransparentMesh: 1
+--- !u!114 &698047980
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 698047976}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 481bf3170e0f2084c8c9ebb17a177cd0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FinalScore
+  scoreText: {fileID: 698047978}
+  score: {fileID: 11400000, guid: a14cb31da0f341c4fa630dea9f34b078, type: 2}
 --- !u!1 &1023276452
 GameObject:
   m_ObjectHideFlags: 0

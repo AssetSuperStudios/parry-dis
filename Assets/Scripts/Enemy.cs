@@ -41,6 +41,8 @@ public class Enemy : MonoBehaviour
 
     private IEnumerator BulletFiring()
     {
+        yield return new WaitForSeconds(bulletInterval * 2);
+
         WaitForSeconds delay = new WaitForSeconds(bulletInterval);
 
         while (true)

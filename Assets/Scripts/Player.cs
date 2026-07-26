@@ -9,20 +9,20 @@ using UnityEditor;
 public class Player : MonoBehaviour
 {
     public LayerMask bulletLayer;
-    public LayerMask defaultLayer;
+    public LayerMask meleeLayer;
     private Animator playerAnimator;
     private SpriteRenderer spriteRenderer;
     public Transform playerTransform;
 
     [Header("Parry Hierarchy Sizes")]
     [Tooltip("Smallest Circle (Inner Core)")]
-    [SerializeField] private float safeParryRadius = 1.0f;
+    [SerializeField] private float safeParryRadius = 0.8f;
     [Tooltip("Middle Circle (Sweet Spot)")]
-    [SerializeField] private float perfectParryRadius = 1.4f;
+    [SerializeField] private float perfectParryRadius = 1.3f;
     [Tooltip("Largest Circle (Outer Edge)")]
-    [SerializeField] private float parryRadius = 2.0f;
+    [SerializeField] private float parryRadius = 1.8f;
     
-    [SerializeField] private float parryDelayMS = 190f;
+    [SerializeField] private float parryDelayMS = 80f;
 
     [Header("Hurt Blinking Settings")]
     [SerializeField] private int blinkCount = 4;          
@@ -40,6 +40,14 @@ public class Player : MonoBehaviour
     private bool isInvincible = false;
     private Vector3 offsetPosition;
     private int hpCounter = 3;
+    [Header("Scoring")]
+    [SerializeField]
+    private Score score;
+    private int perfectScore = 100;
+    private int greatScore = 50;
+    private int safeScore = 10;
+    private int failScore = 0;
+    private int missScore = -50; 
 
     void Start()
     {
@@ -50,6 +58,8 @@ public class Player : MonoBehaviour
         if (playerTransform == null) playerTransform = this.transform;
 
         offsetPosition = transform.position + new Vector3(0, 0.2f, 0);
+
+        score.playerScore = 0;
     }
 
     void Update()
@@ -57,6 +67,11 @@ public class Player : MonoBehaviour
         if (isParrying) return;
 
         if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
+        {
+            StartCoroutine(ParryDelay());
+        }
+
+        if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
         {
             StartCoroutine(ParryDelay());
         }
@@ -84,12 +99,12 @@ public class Player : MonoBehaviour
 
     void TryParry()
     {
-        LayerMask combinedLayer = bulletLayer | defaultLayer;
+        LayerMask combinedLayer = bulletLayer | meleeLayer;
 
         // Gather bullets in all radiuses
         Collider2D[] safeHits = Physics2D.OverlapCircleAll(offsetPosition, safeParryRadius, combinedLayer);
         Collider2D[] perfectHits = Physics2D.OverlapCircleAll(offsetPosition, perfectParryRadius, combinedLayer);
-        Collider2D[] normalHits = Physics2D.OverlapCircleAll(offsetPosition, parryRadius, combinedLayer);
+        Collider2D[] greatHits = Physics2D.OverlapCircleAll(offsetPosition, parryRadius, combinedLayer);
 
         // This list tracks bullets we already destroyed so outer loops don't double-count them
         List<GameObject> processedBullets = new List<GameObject>();
@@ -103,7 +118,7 @@ public class Player : MonoBehaviour
                 processedBullets.Add(hit.gameObject);
 
                 if ((bulletLayer.value & (1 << hit.gameObject.layer)) != 0) {Destroy(hit.gameObject);}
-                else if ((defaultLayer.value & (1 << hit.gameObject.layer)) != 0) {hit.enabled = false;}
+                else if ((meleeLayer.value & (1 << hit.gameObject.layer)) != 0) {hit.enabled = false;}
 
                 safeCount++;
             }
@@ -118,24 +133,24 @@ public class Player : MonoBehaviour
                 processedBullets.Add(hit.gameObject);
 
                 if ((bulletLayer.value & (1 << hit.gameObject.layer)) != 0) {Destroy(hit.gameObject);}
-                else if ((defaultLayer.value & (1 << hit.gameObject.layer)) != 0) {hit.enabled = false;}
+                else if ((meleeLayer.value & (1 << hit.gameObject.layer)) != 0) {hit.enabled = false;}
 
                 perfectCount++;
             }
         }
 
         // 3. THIRD PRIORITY: GOOD/NORMAL PARRY (Largest Circle)
-        int normalCount = 0;
-        foreach (Collider2D hit in normalHits)
+        int greatCount = 0;
+        foreach (Collider2D hit in greatHits)
         {
             if (hit != null && hit.gameObject != null && !processedBullets.Contains(hit.gameObject))
             {
                 processedBullets.Add(hit.gameObject);
 
                 if ((bulletLayer.value & (1 << hit.gameObject.layer)) != 0) {Destroy(hit.gameObject);}
-                else if ((defaultLayer.value & (1 << hit.gameObject.layer)) != 0) {hit.enabled = false;}
+                else if ((meleeLayer.value & (1 << hit.gameObject.layer)) != 0) {hit.enabled = false;}
 
-                normalCount++;
+                greatCount++;
             }
         }
 
@@ -144,16 +159,27 @@ public class Player : MonoBehaviour
         {
             ShowFeedbackText("SAFE PARRY!", Color.red);
             Debug.Log($"Safe Parry: {safeCount}");
+            score.playerScore += (safeScore * safeCount);
         }
         else if (perfectCount > 0)
+        // if (perfectCount > 0)
         {
             ShowFeedbackText("PERFECT PARRY!", Color.yellow);
             Debug.Log($"Perfect Parry: {perfectCount}");
+            score.playerScore += (perfectScore * perfectCount);
         }
-        else if (normalCount > 0)
+        else if (greatCount > 0)
         {
             ShowFeedbackText("GOOD PARRY!", Color.orange);
-            Debug.Log($"Good Parry: {normalCount}");
+            Debug.Log($"Good Parry: {greatCount}");
+            score.playerScore += (greatScore * greatCount);
+        }
+
+        if (safeCount == 0 && perfectCount == 0 && greatCount == 0)
+        {
+            ShowFeedbackText("Miss!", Color.black);
+            Debug.Log("Miss");
+            score.playerScore += missScore;
         }
     }
 
@@ -166,7 +192,7 @@ public class Player : MonoBehaviour
             ProcessFail(collision.gameObject, true);
         }
 
-        if ((defaultLayer.value & (1 << collision.gameObject.layer)) != 0)
+        if ((meleeLayer.value & (1 << collision.gameObject.layer)) != 0)
         {
             ProcessFail(collision.gameObject, false);
         }
@@ -198,6 +224,9 @@ public class Player : MonoBehaviour
                 GameLose();
                 break;
         }
+
+        score.playerScore += failScore;
+
         StartCoroutine(HurtBlinkRoutine());
     }
 

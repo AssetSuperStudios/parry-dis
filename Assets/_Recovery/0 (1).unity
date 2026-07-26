@@ -1386,10 +1386,6 @@ PrefabInstance:
     m_TransformParent: {fileID: 949997909}
     m_Modifications:
     - target: {fileID: 1232612562377808446, guid: db219e36e567f0a4896344aadb513f1e, type: 3}
-      propertyPath: score
-      value: 
-      objectReference: {fileID: 11400000, guid: a14cb31da0f341c4fa630dea9f34b078, type: 2}
-    - target: {fileID: 1232612562377808446, guid: db219e36e567f0a4896344aadb513f1e, type: 3}
       propertyPath: hpText
       value: 
       objectReference: {fileID: 1076421917}
@@ -1407,7 +1403,7 @@ PrefabInstance:
       objectReference: {fileID: 2112574284}
     - target: {fileID: 1232612562377808446, guid: db219e36e567f0a4896344aadb513f1e, type: 3}
       propertyPath: parryDelayMS
-      value: 80
+      value: 120
       objectReference: {fileID: 0}
     - target: {fileID: 1232612562377808446, guid: db219e36e567f0a4896344aadb513f1e, type: 3}
       propertyPath: sceneSwapper
@@ -1420,10 +1416,6 @@ PrefabInstance:
     - target: {fileID: 1232612562377808446, guid: db219e36e567f0a4896344aadb513f1e, type: 3}
       propertyPath: safeParryRadius
       value: 0.8
-      objectReference: {fileID: 0}
-    - target: {fileID: 1232612562377808446, guid: db219e36e567f0a4896344aadb513f1e, type: 3}
-      propertyPath: meleeLayer.m_Bits
-      value: 128
       objectReference: {fileID: 0}
     - target: {fileID: 1232612562377808446, guid: db219e36e567f0a4896344aadb513f1e, type: 3}
       propertyPath: bulletLayer.m_Bits
@@ -1553,10 +1545,6 @@ PrefabInstance:
     - target: {fileID: 5981756505589954718, guid: 4a729421dd5204a4f877cdd1fbf256e6, type: 3}
       propertyPath: m_Layer
       value: 7
-      objectReference: {fileID: 0}
-    - target: {fileID: 7337818933585934533, guid: 4a729421dd5204a4f877cdd1fbf256e6, type: 3}
-      propertyPath: m_CollisionDetection
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7644241113403549820, guid: 4a729421dd5204a4f877cdd1fbf256e6, type: 3}
       propertyPath: m_IsTrigger

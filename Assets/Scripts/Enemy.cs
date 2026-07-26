@@ -39,7 +39,7 @@ public class Enemy : MonoBehaviour
         enemyCollider = GetComponent<Collider2D>();
 
         moveCount = 15;
-        rageTime = 6; // Fixed naming tracking bug
+        rageTime = 5; // Fixed naming tracking bug
         MoveCounter(moveCount);
 
         // Start the loop using clean Async/Await pipeline architecture

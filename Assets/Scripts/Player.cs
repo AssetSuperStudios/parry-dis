@@ -70,8 +70,7 @@ public class Player : MonoBehaviour
         {
             StartCoroutine(ParryDelay());
         }
-
-        if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+        else if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
         {
             StartCoroutine(ParryDelay());
         }

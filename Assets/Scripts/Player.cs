@@ -72,7 +72,15 @@ public class Player : MonoBehaviour
 
         offsetPosition = transform.position + new Vector3(0, 0.2f, 0);
 
-        if (score != null) score.playerScore = 0;
+        if (score != null) 
+        {
+            score.playerScore = 0;
+            score.perfectCount = 0;
+            score.greatCount = 0;
+            score.safeCount = 0;
+            score.missCount = 0;
+            score.failCount = 0;
+        }
     }
 
     void Update()

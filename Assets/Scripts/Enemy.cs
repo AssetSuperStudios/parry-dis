@@ -19,6 +19,8 @@ public class Enemy : MonoBehaviour
 
     [Header("Scenes")]
     [SerializeField] private SceneSwap sceneSwapper;
+    [Header("Rage Mode")]
+    [SerializeField] private SpriteRenderer rageAnimation;
 
     private int moveCount;
     private int rageTime;
@@ -40,7 +42,7 @@ public class Enemy : MonoBehaviour
         enemyCollider = GetComponent<Collider2D>();
         audioSources = GetComponents<AudioSource>();
 
-        moveCount = 15;
+        moveCount = 6;
         rageTime = 5; // Fixed naming tracking bug
         MoveCounter(moveCount);
 
@@ -79,6 +81,10 @@ public class Enemy : MonoBehaviour
 
                 int randomNumber = Random.Range(0, 3);
                 moveCount--;
+                if (moveCount <= rageTime && !hasTriggeredRage) {
+                    rageAnimation.enabled = true;
+                    rageAnimation.GetComponent<AudioSource>().Play();
+                }
                 MoveCounter(moveCount);
 
                 if (token.IsCancellationRequested) break;

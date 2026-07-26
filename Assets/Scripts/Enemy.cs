@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Threading;
 using System.Threading.Tasks;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,7 +11,7 @@ public class Enemy : MonoBehaviour
     [SerializeField] private GameObject _bulletPrefab;
     [SerializeField] private float bulletInterval = 3.0f;
     [SerializeField] private Transform _offset;
-    [SerializeField] private Text moveText;
+    [SerializeField] private TMP_Text moveText;
 
     [Header("Scenes")]
     [SerializeField] private SceneSwap sceneSwapper;

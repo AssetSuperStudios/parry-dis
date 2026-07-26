@@ -1,7 +1,10 @@
+using System.Collections;
+using System.Collections.Generic; // Added for tracking processed bullets
+using System.Security.Cryptography;
+using TMPro;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine.UI;
 
 public class Player : MonoBehaviour
@@ -27,10 +30,9 @@ public class Player : MonoBehaviour
     [SerializeField] private float blinkIntervalMs = 100f; 
 
     [Header("UI Feedback")]
-    [SerializeField] private Text feedbackText; 
-    [SerializeField] private float textDisplayDuration = 0.5f;
-    [SerializeField] private Text hpText; 
-    
+    [SerializeField] private TMP_Text feedbackText; 
+    [SerializeField] private float textDisplayDuration = 1.5f;
+    [SerializeField] private TMP_Text hpText; 
     [Header("Scenes")]
     [SerializeField] private SceneSwap sceneSwapper;
 
@@ -146,9 +148,10 @@ public class Player : MonoBehaviour
         }
 
         // --- DISPLAY UI FEEDBACK AND SAFE SCORE PROCESSING ---
+        CanvasGroup canvasGroup = feedbackText.GetComponent<CanvasGroup>();
         if (safeCount > 0)
         {
-            ShowFeedbackText("SAFE PARRY!", Color.red);
+            ShowFeedbackText("SAFE", Color.red, canvasGroup);
             Debug.Log($"Safe Parry: {safeCount}");
             if (score != null)
             {
@@ -158,7 +161,7 @@ public class Player : MonoBehaviour
         }
         else if (perfectCount > 0)
         {
-            ShowFeedbackText("PERFECT PARRY!", Color.yellow);
+            ShowFeedbackText("PERFECT", Color.yellow, canvasGroup);
             Debug.Log($"Perfect Parry: {perfectCount}");
             if (score != null)
             {
@@ -168,7 +171,7 @@ public class Player : MonoBehaviour
         }
         else if (greatCount > 0)
         {
-            ShowFeedbackText("GOOD PARRY!", Color.orange);
+            ShowFeedbackText("GOOD", Color.orange, canvasGroup);
             Debug.Log($"Good Parry: {greatCount}");
             if (score != null)
             {
@@ -179,7 +182,7 @@ public class Player : MonoBehaviour
 
         if (safeCount == 0 && perfectCount == 0 && greatCount == 0)
         {
-            ShowFeedbackText("Miss!", Color.black);
+            ShowFeedbackText("Miss!", Color.white, canvasGroup);
             Debug.Log("Miss");
             if (score != null)
             {
@@ -268,21 +271,9 @@ public class Player : MonoBehaviour
 
     void GameLose()
     {
-        ShowFeedbackText("YOU LOST", Color.black);
         if (sceneSwapper != null)
         {
             sceneSwapper.SceneSwapper("Lose Scene");
-        }
-    }
-
-    void ShowFeedbackText(string message, Color color)
-    {
-        if (feedbackText != null)
-        {
-            feedbackText.text = message;
-            feedbackText.color = color;
-            StopCoroutine(ClearFeedbackText());
-            StartCoroutine(ClearFeedbackText());
         }
     }
 
@@ -309,5 +300,40 @@ public class Player : MonoBehaviour
 
         if (spriteRenderer != null) spriteRenderer.enabled = true;
         isInvincible = false;
+    }
+
+    void ShowFeedbackText(string message, Color textColor, CanvasGroup canvasGroup)
+    {
+        if (feedbackText != null) 
+        {
+            canvasGroup.alpha = 1;
+            feedbackText.text = message;
+            feedbackText.color = textColor;
+            StopCoroutine(ClearFeedbackText());
+            StartCoroutine(ClearTextRoutine(canvasGroup));
+        }
+
+    }
+
+    IEnumerator ClearTextRoutine(CanvasGroup canvasGroup)
+    {
+        yield return new WaitForSeconds(textDisplayDuration);
+        feedbackText.text = "";
+        canvasGroup.alpha = 0;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        // Red is inner core (Safe)
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(offsetPosition, safeParryRadius);
+        
+        // Yellow is middle sweet spot (Perfect)
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(offsetPosition, perfectParryRadius);
+        
+        // Orange is outer safety rim (Good)
+        Gizmos.color = new Color(1f, 0.5f, 0f); // Orange
+        Gizmos.DrawWireSphere(offsetPosition, parryRadius);
     }
 }

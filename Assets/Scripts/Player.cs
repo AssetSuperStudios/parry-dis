@@ -3,10 +3,13 @@ using UnityEngine.InputSystem;
 using System.Collections;
 using System.Collections.Generic; // Added for tracking processed bullets
 using UnityEngine.UI;
+using System.Security.Cryptography;
+using UnityEditor;
 
 public class Player : MonoBehaviour
 {
     public LayerMask bulletLayer;
+    public LayerMask defaultLayer;
     private Animator playerAnimator;
     private SpriteRenderer spriteRenderer;
     public Transform playerTransform;
@@ -28,10 +31,12 @@ public class Player : MonoBehaviour
     [Header("UI Feedback")]
     [SerializeField] private Text feedbackText; 
     [SerializeField] private float textDisplayDuration = 0.5f;
+    [SerializeField] private Text hpText; 
 
     private bool isParrying = false;
     private bool isInvincible = false;
     private Vector3 offsetPosition;
+    private int hpCounter = 3;
 
     void Start()
     {
@@ -71,15 +76,17 @@ public class Player : MonoBehaviour
 
         yield return new WaitForSeconds(0.1f);
         isParrying = false;
+        gameObject.GetComponent<Collider2D>().enabled = true;
     }
 
     void TryParry()
     {
+        LayerMask combinedLayer = bulletLayer | defaultLayer;
 
         // Gather bullets in all radiuses
-        Collider2D[] safeHits = Physics2D.OverlapCircleAll(offsetPosition, safeParryRadius, bulletLayer);
-        Collider2D[] perfectHits = Physics2D.OverlapCircleAll(offsetPosition, perfectParryRadius, bulletLayer);
-        Collider2D[] normalHits = Physics2D.OverlapCircleAll(offsetPosition, parryRadius, bulletLayer);
+        Collider2D[] safeHits = Physics2D.OverlapCircleAll(offsetPosition, safeParryRadius, combinedLayer);
+        Collider2D[] perfectHits = Physics2D.OverlapCircleAll(offsetPosition, perfectParryRadius, combinedLayer);
+        Collider2D[] normalHits = Physics2D.OverlapCircleAll(offsetPosition, parryRadius, combinedLayer);
 
         // This list tracks bullets we already destroyed so outer loops don't double-count them
         List<GameObject> processedBullets = new List<GameObject>();
@@ -91,7 +98,10 @@ public class Player : MonoBehaviour
             if (hit != null && hit.gameObject != null)
             {
                 processedBullets.Add(hit.gameObject);
-                Destroy(hit.gameObject);
+
+                if ((bulletLayer.value & (1 << hit.gameObject.layer)) != 0) {Destroy(hit.gameObject);}
+                else if ((defaultLayer.value & (1 << hit.gameObject.layer)) != 0) {hit.enabled = false;}
+
                 safeCount++;
             }
         }
@@ -103,7 +113,10 @@ public class Player : MonoBehaviour
             if (hit != null && hit.gameObject != null && !processedBullets.Contains(hit.gameObject))
             {
                 processedBullets.Add(hit.gameObject);
-                Destroy(hit.gameObject);
+
+                if ((bulletLayer.value & (1 << hit.gameObject.layer)) != 0) {Destroy(hit.gameObject);}
+                else if ((defaultLayer.value & (1 << hit.gameObject.layer)) != 0) {hit.enabled = false;}
+
                 perfectCount++;
             }
         }
@@ -115,7 +128,10 @@ public class Player : MonoBehaviour
             if (hit != null && hit.gameObject != null && !processedBullets.Contains(hit.gameObject))
             {
                 processedBullets.Add(hit.gameObject);
-                Destroy(hit.gameObject);
+
+                if ((bulletLayer.value & (1 << hit.gameObject.layer)) != 0) {Destroy(hit.gameObject);}
+                else if ((defaultLayer.value & (1 << hit.gameObject.layer)) != 0) {hit.enabled = false;}
+
                 normalCount++;
             }
         }
@@ -144,15 +160,47 @@ public class Player : MonoBehaviour
 
         if ((bulletLayer.value & (1 << collision.gameObject.layer)) != 0)
         {
-            ProcessFail(collision.gameObject);
+            ProcessFail(collision.gameObject, true);
+        }
+
+        if ((defaultLayer.value & (1 << collision.gameObject.layer)) != 0)
+        {
+            ProcessFail(collision.gameObject, false);
         }
     }
 
-    void ProcessFail(GameObject bullet)
+    void ProcessFail(GameObject bullet, bool isBullet)
     {
-        Destroy(bullet);
+        if (isBullet)
+        {
+            Destroy(bullet);
+        } else
+        {
+            bullet.GetComponent<Collider2D>().enabled = false;
+        }
         Debug.Log("Player hit.");
+        switch (hpCounter)
+        {
+            case 3:
+                hpCounter--;
+                hpText.text = "❤️❤️";
+                break;
+            case 2:
+                hpCounter--;
+                hpText.text = "❤️";
+                break;
+            case 1:
+                hpCounter--;
+                hpText.text = "";
+                GameLose();
+                break;
+        }
         StartCoroutine(HurtBlinkRoutine());
+    }
+
+    void GameLose()
+    {
+        ShowFeedbackText("YOU LOST", Color.black);
     }
 
     IEnumerator HurtBlinkRoutine()

@@ -1,28 +1,43 @@
 fileFormatVersion: 2
-guid: 1ecfbd669083b094b9e9818a186c0030
+guid: 0dec843e3c06a3644955a3070163a41b
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -554351671148403299
-    second: melee_spritesheet_0
+      213: -1129280132676315787
+    second: slippers_spritesheet_0
   - first:
-      213: 5378349600391582347
-    second: melee_spritesheet_1
+      213: -8399593957974941581
+    second: slippers_spritesheet_1
   - first:
-      213: 6596873854278592266
-    second: melee_spritesheet_2
+      213: 3114408846768841420
+    second: slippers_spritesheet_2
   - first:
-      213: 7560891063703943698
-    second: melee_spritesheet_3
+      213: -3653911664469505561
+    second: slippers_spritesheet_3
   - first:
-      213: -446480416370433139
-    second: melee_spritesheet_4
+      213: 4451604331334114039
+    second: slippers_spritesheet_4
   - first:
-      213: -8517250606547869047
-    second: melee_spritesheet_5
+      213: 43620828975579965
+    second: slippers_spritesheet_5
   - first:
-      213: -5489015797817877697
-    second: melee_spritesheet_6
+      213: -5776234632394918862
+    second: slippers_spritesheet_6
+  - first:
+      213: 2430764047655289565
+    second: slippers_spritesheet_7
+  - first:
+      213: 2813271113000596208
+    second: slippers_spritesheet_8
+  - first:
+      213: -6260057941199596531
+    second: slippers_spritesheet_9
+  - first:
+      213: 915991245047276299
+    second: slippers_spritesheet_10
+  - first:
+      213: -916628925146834659
+    second: slippers_spritesheet_11
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -69,7 +84,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 40
+  spritePixelsToUnits: 4
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -131,11 +146,11 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: melee_spritesheet_0
+      name: slippers_spritesheet_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 64
+        y: 0
         width: 64
         height: 64
       alignment: 0
@@ -146,18 +161,18 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d952e88971c8e48f0800000000000000
-      internalID: -554351671148403299
+      spriteID: 5751ce7d3bdf350f0800000000000000
+      internalID: -1129280132676315787
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: melee_spritesheet_1
+      name: slippers_spritesheet_1
       rect:
         serializedVersion: 2
         x: 64
-        y: 64
+        y: 0
         width: 64
         height: 64
       alignment: 0
@@ -168,18 +183,18 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b825431477cb3aa40800000000000000
-      internalID: 5378349600391582347
+      spriteID: 370e2655cc5ae6b80800000000000000
+      internalID: -8399593957974941581
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: melee_spritesheet_2
+      name: slippers_spritesheet_2
       rect:
         serializedVersion: 2
         x: 128
-        y: 64
+        y: 0
         width: 64
         height: 64
       alignment: 0
@@ -190,39 +205,17 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a07665891ddcc8b50800000000000000
-      internalID: 6596873854278592266
+      spriteID: cc2adf4685a983b20800000000000000
+      internalID: 3114408846768841420
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: melee_spritesheet_3
+      name: slippers_spritesheet_3
       rect:
         serializedVersion: 2
         x: 192
-        y: 64
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 21abf75fc5eade860800000000000000
-      internalID: 7560891063703943698
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: melee_spritesheet_4
-      rect:
-        serializedVersion: 2
-        x: 0
         y: 0
         width: 64
         height: 64
@@ -234,30 +227,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d8362174d68cdc9f0800000000000000
-      internalID: -446480416370433139
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: melee_spritesheet_5
-      rect:
-        serializedVersion: 2
-        x: 64
-        y: 0
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 982ebbd13b5acc980800000000000000
-      internalID: -8517250606547869047
+      spriteID: 7e983ae43b2ba4dc0800000000000000
+      internalID: -3653911664469505561
       vertices: []
       indices: 
       edges: []
@@ -266,7 +237,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 79d0585de4e5b5442bf95a4de8809abb
+    spriteID: 93e3d578035d0944d8eddb996fad8136
     internalID: 0
     vertices: []
     indices: 
@@ -278,12 +249,10 @@ TextureImporter:
       - key: SpriteEditor.SliceSettings
         value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      melee_spritesheet_0: -554351671148403299
-      melee_spritesheet_1: 5378349600391582347
-      melee_spritesheet_2: 6596873854278592266
-      melee_spritesheet_3: 7560891063703943698
-      melee_spritesheet_4: -446480416370433139
-      melee_spritesheet_5: -8517250606547869047
+      slippers_spritesheet_0: -1129280132676315787
+      slippers_spritesheet_1: -8399593957974941581
+      slippers_spritesheet_2: 3114408846768841420
+      slippers_spritesheet_3: -3653911664469505561
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

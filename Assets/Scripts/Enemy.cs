@@ -25,6 +25,7 @@ public class Enemy : MonoBehaviour
     private Animator enemyAnimator;
     private Transform enemyTransform;
     private Collider2D enemyCollider;
+    private AudioSource[] audioSources;
     
     // TRACKER: Ensures bulletInterval division executes exactly once
     private bool hasTriggeredRage = false; 
@@ -37,6 +38,7 @@ public class Enemy : MonoBehaviour
         enemyAnimator = GetComponent<Animator>();
         enemyTransform = GetComponent<Transform>();
         enemyCollider = GetComponent<Collider2D>();
+        audioSources = GetComponents<AudioSource>();
 
         moveCount = 15;
         rageTime = 5; // Fixed naming tracking bug
@@ -83,10 +85,13 @@ public class Enemy : MonoBehaviour
 
                 if (randomNumber == 0) 
                 {
+                    audioSources[1].Play();
+                    audioSources[2].PlayDelayed(0.3f);
                     await MeleeAttack(token);
                 } 
                 else 
                 {
+                    audioSources[0].Play();
                     await FireBullet(token);
                 }
                 

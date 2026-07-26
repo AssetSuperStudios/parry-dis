@@ -21,6 +21,8 @@ public class Player : MonoBehaviour
     [SerializeField] private float parryRadius = 1.9f;
     
     [SerializeField] private float parryDelayMS = 90f;
+    [Tooltip("How long the parry box stays active checking for bullets")]
+    [SerializeField] private float parryActiveDuration = 0.1f;
 
     [Header("Hurt Blinking Settings")]
     [SerializeField] private int blinkCount = 4;          
@@ -33,11 +35,19 @@ public class Player : MonoBehaviour
     
     [Header("Scenes")]
     [SerializeField] private SceneSwap sceneSwapper;
+    
+    [Header("Juice & Responsiveness")]
+    [Tooltip("How early a player can press parry before the action executes safely")]
+    [SerializeField] private float inputBufferTime = 0.15f; 
+    private float inputBufferCounter = 0f;
 
-    private bool isParrying = false;
+    private bool isWindUp = false; 
+    private bool isParrying = false; 
     private bool isInvincible = false;
     private Vector3 offsetPosition;
     private int hpCounter = 3;
+
+    private bool registeredParryHitInWindow = false;
 
     [Header("Scoring")]
     [SerializeField] private Score score;
@@ -62,27 +72,35 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-        // Safety guard: Stop inputs if parrying or if the player is dead/handling a game over screen
-        if (isParrying || (isInvincible && hpCounter <= 0)) return;
+        offsetPosition = transform.position + new Vector3(0, 0.2f, 0);
 
-        if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
+        if (inputBufferCounter > 0)
         {
-            StartCoroutine(ParryDelay());
+            inputBufferCounter -= Time.deltaTime;
         }
-        else if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+
+        if ((Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame) ||
+            (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame))
         {
-            StartCoroutine(ParryDelay());
+            inputBufferCounter = inputBufferTime;
+        }
+
+        if (isWindUp || isParrying || (isInvincible && hpCounter <= 0)) return;
+
+        if (inputBufferCounter > 0)
+        {
+            inputBufferCounter = 0f;
+            StartCoroutine(ParrySequenceRoutine());
         }
     }
 
-    IEnumerator ParryDelay()
+    IEnumerator ParrySequenceRoutine()
     {
-        isParrying = true;
+        isWindUp = true; 
         if (playerAnimator != null) playerAnimator.SetTrigger("isParry");
 
         float delayInSeconds = parryDelayMS / 1000f;
         int physicsFramesToWait = Mathf.RoundToInt(delayInSeconds / Time.fixedDeltaTime);
-
         if (physicsFramesToWait < 1) physicsFramesToWait = 1;
 
         for (int i = 0; i < physicsFramesToWait; i++)
@@ -90,16 +108,35 @@ public class Player : MonoBehaviour
             yield return new WaitForFixedUpdate();
         }
 
-        TryParry();
+        isWindUp = false;
+        isParrying = true; 
+        registeredParryHitInWindow = false;
 
-        yield return new WaitForSeconds(0.1f);
+        float elapsedTime = 0f;
+        while (elapsedTime < parryActiveDuration)
+        {
+            TickParryDetection();
+            elapsedTime += Time.fixedDeltaTime;
+            yield return new WaitForFixedUpdate();
+        }
+
+        if (!registeredParryHitInWindow)
+        {
+            ShowFeedbackText("Miss!", Color.black);
+            if (score != null)
+            {
+                score.playerScore += missScore;
+                score.missCount += 1;
+            }
+        }
+
         isParrying = false;
         
         Collider2D myCol = gameObject.GetComponent<Collider2D>();
         if (myCol != null) myCol.enabled = true;
     }
 
-    void TryParry()
+        void TickParryDetection()
     {
         LayerMask combinedLayer = bulletLayer | meleeLayer;
 
@@ -109,23 +146,22 @@ public class Player : MonoBehaviour
 
         List<GameObject> processedBullets = new List<GameObject>();
 
-        // 1. FIRST PRIORITY: SAFE PARRY
         int safeCount = 0;
         foreach (Collider2D hit in safeHits)
         {
-            if (hit != null && hit.gameObject != null)
-            {
-                processedBullets.Add(hit.gameObject);
-                ExecuteParryHit(hit);
-                safeCount++;
-            }
+            if (hit == null || !hit || hit.gameObject == null || !hit.gameObject || !hit.gameObject.activeSelf) continue;
+
+            processedBullets.Add(hit.gameObject);
+            ExecuteParryHit(hit);
+            safeCount++;
         }
 
-        // 2. SECOND PRIORITY: PERFECT PARRY
         int perfectCount = 0;
         foreach (Collider2D hit in perfectHits)
         {
-            if (hit != null && hit.gameObject != null && !processedBullets.Contains(hit.gameObject))
+            if (hit == null || !hit || hit.gameObject == null || !hit.gameObject || !hit.gameObject.activeSelf) continue;
+
+            if (!processedBullets.Contains(hit.gameObject))
             {
                 processedBullets.Add(hit.gameObject);
                 ExecuteParryHit(hit);
@@ -133,23 +169,23 @@ public class Player : MonoBehaviour
             }
         }
 
-        // 3. THIRD PRIORITY: GOOD/NORMAL PARRY
         int greatCount = 0;
         foreach (Collider2D hit in greatHits)
         {
-            if (hit != null && hit.gameObject != null && !processedBullets.Contains(hit.gameObject))
+            if (hit == null || !hit || hit.gameObject == null || !hit.gameObject || !hit.gameObject.activeSelf) continue;
+
+            if (!processedBullets.Contains(hit.gameObject))
             {
                 processedBullets.Add(hit.gameObject);
                 ExecuteParryHit(hit);
                 greatCount++;
             }
         }
-
-        // --- DISPLAY UI FEEDBACK AND SAFE SCORE PROCESSING ---
+        
         if (safeCount > 0)
         {
+            registeredParryHitInWindow = true;
             ShowFeedbackText("SAFE PARRY!", Color.red);
-            Debug.Log($"Safe Parry: {safeCount}");
             if (score != null)
             {
                 score.playerScore += (safeScore * safeCount);
@@ -158,8 +194,8 @@ public class Player : MonoBehaviour
         }
         else if (perfectCount > 0)
         {
+            registeredParryHitInWindow = true;
             ShowFeedbackText("PERFECT PARRY!", Color.yellow);
-            Debug.Log($"Perfect Parry: {perfectCount}");
             if (score != null)
             {
                 score.playerScore += (perfectScore * perfectCount);
@@ -168,23 +204,12 @@ public class Player : MonoBehaviour
         }
         else if (greatCount > 0)
         {
+            registeredParryHitInWindow = true;
             ShowFeedbackText("GOOD PARRY!", Color.orange);
-            Debug.Log($"Good Parry: {greatCount}");
             if (score != null)
             {
                 score.playerScore += (greatScore * greatCount);
                 score.greatCount += greatCount;
-            }
-        }
-
-        if (safeCount == 0 && perfectCount == 0 && greatCount == 0)
-        {
-            ShowFeedbackText("Miss!", Color.black);
-            Debug.Log("Miss");
-            if (score != null)
-            {
-                score.playerScore += missScore;
-                score.missCount += 1;
             }
         }
     }
@@ -193,6 +218,7 @@ public class Player : MonoBehaviour
     {
         if ((bulletLayer.value & (1 << hit.gameObject.layer)) != 0) 
         {
+            hit.gameObject.SetActive(false); 
             Destroy(hit.gameObject);
         }
         else if ((meleeLayer.value & (1 << hit.gameObject.layer)) != 0) 
@@ -230,7 +256,6 @@ public class Player : MonoBehaviour
             }
         }
         
-        Debug.Log("Player hit.");
         hpCounter--;
         
         switch (hpCounter)
@@ -244,14 +269,14 @@ public class Player : MonoBehaviour
             case 0:
                 if (hpText != null) hpText.text = "";
                 
-                // CRITICAL CRASH PROTECTION: Lock player states and clear collision bounds
+                // CRITICAL SHUTDOWN FOR GAME OVER: Terminate collision bounds entirely
                 isInvincible = true; 
                 isParrying = true; 
                 Collider2D playerCol = GetComponent<Collider2D>();
                 if (playerCol != null) playerCol.enabled = false;
                 
                 GameLose();
-                return; // End execution early so the HurtBlinkRoutine doesn't fire on a dead object
+                return; // Early exit so the blinking routine does not trigger on a dead player
         }
 
         if (score != null)
@@ -292,7 +317,6 @@ public class Player : MonoBehaviour
         if (feedbackText != null) feedbackText.text = "";
     }
 
-    // FIXED: Formatted the missing brackets and component protections
     IEnumerator HurtBlinkRoutine()
     {
         isInvincible = true;
@@ -309,5 +333,34 @@ public class Player : MonoBehaviour
 
         if (spriteRenderer != null) spriteRenderer.enabled = true;
         isInvincible = false;
+    }
+
+    private void OnDrawGizmos()
+    {
+        Vector3 currentOffset = transform.position + new Vector3(0, 0.2f, 0);
+
+        // Gizmos turn BLUE during the 90ms windup, and their normal colors when ACTIVE
+        if (isWindUp)
+        {
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawWireSphere(currentOffset, safeParryRadius);
+            Gizmos.DrawWireSphere(currentOffset, perfectParryRadius);
+            Gizmos.DrawWireSphere(currentOffset, parryRadius);
+        }
+        else if (isParrying)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(currentOffset, safeParryRadius);
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(currentOffset, perfectParryRadius);
+            Gizmos.color = Color.orange;
+            Gizmos.DrawWireSphere(currentOffset, parryRadius);
+        }
+        else
+        {
+            // Default gray/faded look when resting
+            Gizmos.color = new Color(0.5f, 0.5f, 0.5f, 0.3f);
+            Gizmos.DrawWireSphere(currentOffset, parryRadius);
+        }
     }
 }

@@ -2,22 +2,21 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
-    [SerializeField] 
-    public float movementSpeed = 24f;
+    [SerializeField] public float movementSpeed = 24f;
+    [SerializeField] private float lifeTime = 10.0f;
+    
     private Rigidbody2D rb;
-    [SerializeField] 
-    float lifeTime = 10.0f;
-
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();    
-        Destroy(gameObject, lifeTime);
-    }
+        
+        // CRITICAL CRASH FIX: Move via velocity instead of transform.Translate
+        if (rb != null)
+        {
+            rb.linearVelocity = transform.right * movementSpeed;
+        }
 
-    // Update is called once per frame
-    void Update()
-    {
-        transform.Translate(Vector2.right * movementSpeed * Time.deltaTime);
+        Destroy(gameObject, lifeTime);
     }
 }

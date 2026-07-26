@@ -1407,7 +1407,7 @@ PrefabInstance:
       objectReference: {fileID: 2112574284}
     - target: {fileID: 1232612562377808446, guid: db219e36e567f0a4896344aadb513f1e, type: 3}
       propertyPath: parryDelayMS
-      value: 90
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1232612562377808446, guid: db219e36e567f0a4896344aadb513f1e, type: 3}
       propertyPath: sceneSwapper

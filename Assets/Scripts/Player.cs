@@ -298,7 +298,7 @@ public class Player : MonoBehaviour
                 Collider2D playerCol = GetComponent<Collider2D>();
                 if (playerCol != null) playerCol.enabled = false;
                 
-                GameLose();
+                Invoke("GameLose", 1f);
                 return; // Early exit so the blinking routine does not trigger on a dead player
         }
 

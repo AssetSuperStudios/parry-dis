@@ -1792,6 +1792,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1747267941}
+  - component: {fileID: 1747267942}
   m_Layer: 5
   m_Name: ScoreObject
   m_TagString: Untagged
@@ -1822,6 +1823,21 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1747267942
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1747267940}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 481bf3170e0f2084c8c9ebb17a177cd0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FinalScore
+  scoreText: {fileID: 1955144666}
+  breakdownText: {fileID: 656257892}
+  score: {fileID: 11400000, guid: a14cb31da0f341c4fa630dea9f34b078, type: 2}
 --- !u!1 &1794631983
 GameObject:
   m_ObjectHideFlags: 0

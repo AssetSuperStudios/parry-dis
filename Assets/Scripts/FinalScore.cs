@@ -11,10 +11,13 @@ public class FinalScore : MonoBehaviour
     [SerializeField] 
     private Score score;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    void Awake()
     {
+        breakdownText.text = "";
+
         if (scoreText != null)
         {
+            scoreText.text = "";
             scoreText.text = $"{starScore()}";
         } 
 

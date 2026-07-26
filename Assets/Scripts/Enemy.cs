@@ -16,6 +16,9 @@ public class Enemy : MonoBehaviour
     private Transform _offset;
     [SerializeField] 
     private Text moveText;
+    [Header("Scenes")]
+    [SerializeField]
+    private SceneSwap sceneSwapper;
 
     private int moveCount;
     private Animator enemyAnimator;
@@ -45,6 +48,7 @@ public class Enemy : MonoBehaviour
             if (moveCount == 0)
             {
                 Debug.Log("YOU WIN");
+                sceneSwapper.SceneSwapper("Win Scene");
                 break;
             }
 

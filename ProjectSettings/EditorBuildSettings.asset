@@ -8,5 +8,11 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/MockupSCN.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
+  - enabled: 1
+    path: Assets/Scenes/Lose Scene.unity
+    guid: 83cb3c4e37775eb49bd0f093d11be7fb
+  - enabled: 1
+    path: Assets/Scenes/Win Scene.unity
+    guid: 2faa2828ef669f14b893732915554c39
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}

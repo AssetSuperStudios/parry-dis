@@ -32,6 +32,9 @@ public class Player : MonoBehaviour
     [SerializeField] private Text feedbackText; 
     [SerializeField] private float textDisplayDuration = 0.5f;
     [SerializeField] private Text hpText; 
+    [Header("Scenes")]
+    [SerializeField]
+    private SceneSwap sceneSwapper;
 
     private bool isParrying = false;
     private bool isInvincible = false;
@@ -201,6 +204,7 @@ public class Player : MonoBehaviour
     void GameLose()
     {
         ShowFeedbackText("YOU LOST", Color.black);
+        sceneSwapper.SceneSwapper("Lose Scene");
     }
 
     IEnumerator HurtBlinkRoutine()

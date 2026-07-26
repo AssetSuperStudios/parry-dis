@@ -127,7 +127,7 @@ public class Player : MonoBehaviour
 
         if (!registeredParryHitInWindow)
         {
-            ShowFeedbackText("Miss!", Color.black, canvasGroup);
+            ShowFeedbackText("Miss!", Color.white, canvasGroup);
             if (score != null)
             {
                 score.playerScore += missScore;

@@ -1,10 +1,8 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
-using System.Collections.Generic; // Added for tracking processed bullets
+using System.Collections.Generic;
 using UnityEngine.UI;
-using System.Security.Cryptography;
-using UnityEditor;
 
 public class Player : MonoBehaviour
 {
@@ -32,17 +30,17 @@ public class Player : MonoBehaviour
     [SerializeField] private Text feedbackText; 
     [SerializeField] private float textDisplayDuration = 0.5f;
     [SerializeField] private Text hpText; 
+    
     [Header("Scenes")]
-    [SerializeField]
-    private SceneSwap sceneSwapper;
+    [SerializeField] private SceneSwap sceneSwapper;
 
     private bool isParrying = false;
     private bool isInvincible = false;
     private Vector3 offsetPosition;
     private int hpCounter = 3;
+
     [Header("Scoring")]
-    [SerializeField]
-    private Score score;
+    [SerializeField] private Score score;
     private int perfectScore = 100;
     private int greatScore = 50;
     private int safeScore = 10;
@@ -59,12 +57,13 @@ public class Player : MonoBehaviour
 
         offsetPosition = transform.position + new Vector3(0, 0.2f, 0);
 
-        score.playerScore = 0;
+        if (score != null) score.playerScore = 0;
     }
 
     void Update()
     {
-        if (isParrying) return;
+        // Safety guard: Stop inputs if parrying or if the player is dead/handling a game over screen
+        if (isParrying || (isInvincible && hpCounter <= 0)) return;
 
         if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
         {
@@ -79,10 +78,12 @@ public class Player : MonoBehaviour
     IEnumerator ParryDelay()
     {
         isParrying = true;
-        playerAnimator.SetTrigger("isParry");
+        if (playerAnimator != null) playerAnimator.SetTrigger("isParry");
 
         float delayInSeconds = parryDelayMS / 1000f;
         int physicsFramesToWait = Mathf.RoundToInt(delayInSeconds / Time.fixedDeltaTime);
+
+        if (physicsFramesToWait < 1) physicsFramesToWait = 1;
 
         for (int i = 0; i < physicsFramesToWait; i++)
         {
@@ -93,105 +94,122 @@ public class Player : MonoBehaviour
 
         yield return new WaitForSeconds(0.1f);
         isParrying = false;
-        gameObject.GetComponent<Collider2D>().enabled = true;
+        
+        Collider2D myCol = gameObject.GetComponent<Collider2D>();
+        if (myCol != null) myCol.enabled = true;
     }
 
     void TryParry()
     {
         LayerMask combinedLayer = bulletLayer | meleeLayer;
 
-        // Gather bullets in all radiuses
         Collider2D[] safeHits = Physics2D.OverlapCircleAll(offsetPosition, safeParryRadius, combinedLayer);
         Collider2D[] perfectHits = Physics2D.OverlapCircleAll(offsetPosition, perfectParryRadius, combinedLayer);
         Collider2D[] greatHits = Physics2D.OverlapCircleAll(offsetPosition, parryRadius, combinedLayer);
 
-        // This list tracks bullets we already destroyed so outer loops don't double-count them
         List<GameObject> processedBullets = new List<GameObject>();
 
-        // 1. FIRST PRIORITY: SAFE PARRY (Smallest Circle)
+        // 1. FIRST PRIORITY: SAFE PARRY
         int safeCount = 0;
         foreach (Collider2D hit in safeHits)
         {
             if (hit != null && hit.gameObject != null)
             {
                 processedBullets.Add(hit.gameObject);
-
-                if ((bulletLayer.value & (1 << hit.gameObject.layer)) != 0) {Destroy(hit.gameObject);}
-                else if ((meleeLayer.value & (1 << hit.gameObject.layer)) != 0) {hit.enabled = false;}
-
+                ExecuteParryHit(hit);
                 safeCount++;
             }
         }
 
-        // 2. SECOND PRIORITY: PERFECT PARRY (Middle Circle)
+        // 2. SECOND PRIORITY: PERFECT PARRY
         int perfectCount = 0;
         foreach (Collider2D hit in perfectHits)
         {
             if (hit != null && hit.gameObject != null && !processedBullets.Contains(hit.gameObject))
             {
                 processedBullets.Add(hit.gameObject);
-
-                if ((bulletLayer.value & (1 << hit.gameObject.layer)) != 0) {Destroy(hit.gameObject);}
-                else if ((meleeLayer.value & (1 << hit.gameObject.layer)) != 0) {hit.enabled = false;}
-
+                ExecuteParryHit(hit);
                 perfectCount++;
             }
         }
 
-        // 3. THIRD PRIORITY: GOOD/NORMAL PARRY (Largest Circle)
+        // 3. THIRD PRIORITY: GOOD/NORMAL PARRY
         int greatCount = 0;
         foreach (Collider2D hit in greatHits)
         {
             if (hit != null && hit.gameObject != null && !processedBullets.Contains(hit.gameObject))
             {
                 processedBullets.Add(hit.gameObject);
-
-                if ((bulletLayer.value & (1 << hit.gameObject.layer)) != 0) {Destroy(hit.gameObject);}
-                else if ((meleeLayer.value & (1 << hit.gameObject.layer)) != 0) {hit.enabled = false;}
-
+                ExecuteParryHit(hit);
                 greatCount++;
             }
         }
 
-        // --- DISPLAY UI FEEDBACK BASED ON HIGHEST TIER TRIGGERED ---
+        // --- DISPLAY UI FEEDBACK AND SAFE SCORE PROCESSING ---
         if (safeCount > 0)
         {
             ShowFeedbackText("SAFE PARRY!", Color.red);
             Debug.Log($"Safe Parry: {safeCount}");
-            score.playerScore += (safeScore * safeCount);
+            if (score != null)
+            {
+                score.playerScore += (safeScore * safeCount);
+                score.safeCount += safeCount;
+            }
         }
         else if (perfectCount > 0)
-        // if (perfectCount > 0)
         {
             ShowFeedbackText("PERFECT PARRY!", Color.yellow);
             Debug.Log($"Perfect Parry: {perfectCount}");
-            score.playerScore += (perfectScore * perfectCount);
+            if (score != null)
+            {
+                score.playerScore += (perfectScore * perfectCount);
+                score.perfectCount += perfectCount;
+            }
         }
         else if (greatCount > 0)
         {
             ShowFeedbackText("GOOD PARRY!", Color.orange);
             Debug.Log($"Good Parry: {greatCount}");
-            score.playerScore += (greatScore * greatCount);
+            if (score != null)
+            {
+                score.playerScore += (greatScore * greatCount);
+                score.greatCount += greatCount;
+            }
         }
 
         if (safeCount == 0 && perfectCount == 0 && greatCount == 0)
         {
             ShowFeedbackText("Miss!", Color.black);
             Debug.Log("Miss");
-            score.playerScore += missScore;
+            if (score != null)
+            {
+                score.playerScore += missScore;
+                score.missCount += 1;
+            }
+        }
+    }
+
+    void ExecuteParryHit(Collider2D hit)
+    {
+        if ((bulletLayer.value & (1 << hit.gameObject.layer)) != 0) 
+        {
+            Destroy(hit.gameObject);
+        }
+        else if ((meleeLayer.value & (1 << hit.gameObject.layer)) != 0) 
+        {
+            hit.enabled = false;
         }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (isInvincible) return;
+        if (isInvincible || isParrying) return;
 
         if ((bulletLayer.value & (1 << collision.gameObject.layer)) != 0)
         {
             ProcessFail(collision.gameObject, true);
         }
-
-        if ((meleeLayer.value & (1 << collision.gameObject.layer)) != 0)
+        else if ((meleeLayer.value & (1 << collision.gameObject.layer)) != 0)
         {
             ProcessFail(collision.gameObject, false);
         }
@@ -201,40 +219,80 @@ public class Player : MonoBehaviour
     {
         if (isBullet)
         {
-            Destroy(bullet);
-        } else
+            if (bullet != null) Destroy(bullet);
+        } 
+        else
         {
-            bullet.GetComponent<Collider2D>().enabled = false;
+            if (bullet != null)
+            {
+                Collider2D col = bullet.GetComponent<Collider2D>();
+                if (col != null) col.enabled = false;
+            }
         }
+        
         Debug.Log("Player hit.");
+        hpCounter--;
+        
         switch (hpCounter)
         {
-            case 3:
-                hpCounter--;
-                hpText.text = "❤️❤️";
-                break;
             case 2:
-                hpCounter--;
-                hpText.text = "❤️";
+                if (hpText != null) hpText.text = "❤️❤️";
                 break;
             case 1:
-                hpCounter--;
-                hpText.text = "";
-                GameLose();
+                if (hpText != null) hpText.text = "❤️";
                 break;
+            case 0:
+                if (hpText != null) hpText.text = "";
+                
+                // CRITICAL CRASH PROTECTION: Lock player states and clear collision bounds
+                isInvincible = true; 
+                isParrying = true; 
+                Collider2D playerCol = GetComponent<Collider2D>();
+                if (playerCol != null) playerCol.enabled = false;
+                
+                GameLose();
+                return; // End execution early so the HurtBlinkRoutine doesn't fire on a dead object
         }
 
-        score.playerScore += failScore;
+        if (score != null)
+        {
+            score.playerScore += failScore;
+            score.failCount += 1;
+        }
 
-        StartCoroutine(HurtBlinkRoutine());
+        if (hpCounter > 0)
+        {
+            StartCoroutine(HurtBlinkRoutine());
+        }
     }
 
     void GameLose()
     {
         ShowFeedbackText("YOU LOST", Color.black);
-        sceneSwapper.SceneSwapper("Lose Scene");
+        if (sceneSwapper != null)
+        {
+            sceneSwapper.SceneSwapper("Lose Scene");
+        }
     }
 
+    void ShowFeedbackText(string message, Color color)
+    {
+        if (feedbackText != null)
+        {
+            feedbackText.text = message;
+            feedbackText.color = color;
+            StopCoroutine(ClearFeedbackText());
+            StartCoroutine(ClearFeedbackText());
+        }
+    }
+
+    IEnumerator ClearFeedbackText()
+    {
+        yield return new WaitForSeconds(textDisplayDuration);
+        if (feedbackText != null) feedbackText.text = "";
+    }
+
+    // FIXED: Formatted the missing brackets and component protections
     IEnumerator HurtBlinkRoutine()
     {
         isInvincible = true;
@@ -242,45 +300,14 @@ public class Player : MonoBehaviour
 
         for (int i = 0; i < blinkCount; i++)
         {
-            spriteRenderer.enabled = false;
+            if (spriteRenderer != null) spriteRenderer.enabled = false;
             yield return new WaitForSeconds(delayInSeconds);
 
-            spriteRenderer.enabled = true;
+            if (spriteRenderer != null) spriteRenderer.enabled = true;
             yield return new WaitForSeconds(delayInSeconds);
         }
 
-        spriteRenderer.enabled = true; 
+        if (spriteRenderer != null) spriteRenderer.enabled = true;
         isInvincible = false;
-    }
-
-    void ShowFeedbackText(string message, Color textColor)
-    {
-        if (feedbackText == null) return;
-
-        StopCoroutine("ClearTextRoutine");
-        feedbackText.text = message;
-        feedbackText.color = textColor;
-        StartCoroutine(ClearTextRoutine());
-    }
-
-    IEnumerator ClearTextRoutine()
-    {
-        yield return new WaitForSeconds(textDisplayDuration);
-        feedbackText.text = ""; 
-    }
-
-    private void OnDrawGizmosSelected()
-    {       
-        // Red is inner core (Safe)
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(offsetPosition, safeParryRadius);
-        
-        // Yellow is middle sweet spot (Perfect)
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(offsetPosition, perfectParryRadius);
-        
-        // Orange is outer safety rim (Good)
-        Gizmos.color = new Color(1f, 0.5f, 0f); // Orange
-        Gizmos.DrawWireSphere(offsetPosition, parryRadius);
     }
 }

@@ -6,93 +6,116 @@ using UnityEngine.UI;
 
 public class Enemy : MonoBehaviour
 {
-    private Coroutine _bulletFiring;
     [Header("Bullet")]
-    [SerializeField]
-    private GameObject _bulletPrefab;
-    [SerializeField] 
-    float bulletInterval = 3.0f;
-    [SerializeField] 
-    private Transform _offset;
-    [SerializeField] 
-    private Text moveText;
+    [SerializeField] private GameObject _bulletPrefab;
+    [SerializeField] private float bulletInterval = 3.0f;
+    [SerializeField] private Transform _offset;
+    [SerializeField] private Text moveText;
+
     [Header("Scenes")]
-    [SerializeField]
-    private SceneSwap sceneSwapper;
+    [SerializeField] private SceneSwap sceneSwapper;
 
     private int moveCount;
     private Animator enemyAnimator;
     private Transform enemyTransform;
+    private Collider2D enemyCollider;
     
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    // Cancellation token to safely stop the loop when the GameObject is destroyed
+    private CancellationTokenSource _loopCancellationTokenSource;
+
     void Start()
     {
-        // Fetch the Enemy's Animator component
         enemyAnimator = GetComponent<Animator>();
-        // Initialize move counter
+        enemyTransform = GetComponent<Transform>();
+        enemyCollider = GetComponent<Collider2D>();
+
         moveCount = 10;
         MoveCounter(moveCount);
 
-        // Fetch the Enemy's Transform component
-        enemyTransform = GetComponent<Transform>();
-
-        _bulletFiring = StartCoroutine(BulletFiring());
+        // Start the loop using Async/Await
+        _loopCancellationTokenSource = new CancellationTokenSource();
+        _ = RunAttackLoop(_loopCancellationTokenSource.Token);
     }
 
-    private IEnumerator BulletFiring()
+    private async Task RunAttackLoop(CancellationToken token)
     {
-        yield return new WaitForSeconds(bulletInterval * 2);
-
-        WaitForSeconds delay = new WaitForSeconds(bulletInterval);
-
-        while (true)
+        try
         {
-            if (moveCount == 0)
+            await Awaitable.WaitForSecondsAsync(bulletInterval * 2, token);
+
+            while (!token.IsCancellationRequested)
             {
-                Debug.Log("YOU WIN");
-                sceneSwapper.SceneSwapper("Win Scene");
-                break;
+                if (moveCount <= 0)
+                {
+                    Debug.Log("YOU WIN");
+                    if (sceneSwapper != null) sceneSwapper.SceneSwapper("Win Scene");
+                    break;
+                }
+
+                if (enemyCollider != null) enemyCollider.enabled = true;
+
+                int randomNumber = Random.Range(0, 3);
+                moveCount--;
+                MoveCounter(moveCount);
+
+                if (randomNumber == 0) 
+                {
+                    await MeleeAttack(token);
+                } 
+                else 
+                {
+                    await FireBullet(token);
+                }
+                
+                await Awaitable.WaitForSecondsAsync(bulletInterval, token);
             }
-
-            gameObject.GetComponent<Collider2D>().enabled = true;
-
-            // Randomize
-            var randomNumber = Random.Range(0, 3);
-            MoveCounter(--moveCount);
-            if (randomNumber == 0) {MeleeAttack();} else {FireBullet();}
-            
-            yield return delay;
+        }
+        catch (System.OperationCanceledException)
+        {
+            // Clean exit when task is cancelled or object is destroyed
         }
     }
 
     void MoveCounter(int moveNumber)
     {
-        moveText.text = $"MOVES: {moveNumber}";
+        if (moveText != null)
+        {
+            moveText.text = $"MOVES: {moveNumber}";
+        }
     }
 
-    async Task FireBullet()
+    async Task FireBullet(CancellationToken token)
     {
-        // Start the long range animation
-        enemyAnimator.SetTrigger("isLRange");
-        await Awaitable.WaitForSecondsAsync(0.2f);
-
-        Instantiate(_bulletPrefab, _offset.position, transform.rotation);
-    }
-
-    async Task MeleeAttack()
-    {
-        // Start the tp melee animation
-        enemyAnimator.SetTrigger("isTPMelee");
-        await Awaitable.WaitForSecondsAsync(0.3f);
-
-        enemyTransform.localPosition = new Vector3(4.6f, 0f, 0f);
+        if (enemyAnimator != null) enemyAnimator.SetTrigger("isLRange");
         
-        await Awaitable.WaitForSecondsAsync(0.75f);
-        enemyTransform.localPosition = new Vector3(0f, 0f, 0f);
+        await Awaitable.WaitForSecondsAsync(0.2f, token);
+
+        if (_bulletPrefab != null && _offset != null)
+        {
+            Instantiate(_bulletPrefab, _offset.position, transform.rotation);
+        }
     }
 
-    private void DisableBulletFire()
+    async Task MeleeAttack(CancellationToken token)
     {
-        if (_bulletFiring != null) StopCoroutine(_bulletFiring);
+        if (enemyAnimator != null) enemyAnimator.SetTrigger("isTPMelee");
+        
+        await Awaitable.WaitForSecondsAsync(0.3f, token);
+
+        if (enemyTransform != null) enemyTransform.localPosition = new Vector3(4.6f, 0f, 0f);
+        
+        await Awaitable.WaitForSecondsAsync(0.75f, token);
+        
+        if (enemyTransform != null) enemyTransform.localPosition = new Vector3(0f, 0f, 0f);
+    }
+
+    private void OnDestroy()
+    {
+        // Safety feature: stops the async loop instantly if the Enemy dies/is destroyed
+        if (_loopCancellationTokenSource != null)
+        {
+            _loopCancellationTokenSource.Cancel();
+            _loopCancellationTokenSource.Dispose();
+        }
     }
 }

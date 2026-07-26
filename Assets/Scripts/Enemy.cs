@@ -7,9 +7,13 @@ using UnityEngine.UI;
 
 public class Enemy : MonoBehaviour
 {
-    [Header("Bullet")]
+    [Header("Bullet Configurations")]
     [SerializeField] private GameObject _bulletPrefab;
     [SerializeField] private float bulletInterval = 3.0f;
+    [Tooltip("The speed assigned to bullets fired during normal phases")]
+    [SerializeField] private float normalBulletSpeed = 24f;
+    [Tooltip("The speed assigned to bullets fired during rage mode")]
+    [SerializeField] private float rageBulletSpeed = 32f;
     [SerializeField] private Transform _offset;
     [SerializeField] private TMP_Text moveText;
 
@@ -17,11 +21,15 @@ public class Enemy : MonoBehaviour
     [SerializeField] private SceneSwap sceneSwapper;
 
     private int moveCount;
+    private int rageTime;
     private Animator enemyAnimator;
     private Transform enemyTransform;
     private Collider2D enemyCollider;
     
-    // Cancellation token to safely stop the loop when the GameObject is destroyed
+    // TRACKER: Ensures bulletInterval division executes exactly once
+    private bool hasTriggeredRage = false; 
+
+    // Safety token architecture to clear threads on object destruction
     private CancellationTokenSource _loopCancellationTokenSource;
 
     void Start()
@@ -30,10 +38,11 @@ public class Enemy : MonoBehaviour
         enemyTransform = GetComponent<Transform>();
         enemyCollider = GetComponent<Collider2D>();
 
-        moveCount = 10;
+        moveCount = 15;
+        rageTime = 5; // Fixed naming tracking bug
         MoveCounter(moveCount);
 
-        // Start the loop using Async/Await
+        // Start the loop using clean Async/Await pipeline architecture
         _loopCancellationTokenSource = new CancellationTokenSource();
         _ = RunAttackLoop(_loopCancellationTokenSource.Token);
     }
@@ -42,15 +51,26 @@ public class Enemy : MonoBehaviour
     {
         try
         {
+            // Initial safety setup delay
             await Awaitable.WaitForSecondsAsync(bulletInterval * 2, token);
 
             while (!token.IsCancellationRequested)
             {
+                // CRITICAL TIMING GUARD: Step out if screen shifts or manager component drops
+                if (sceneSwapper == null) break;
+
                 if (moveCount <= 0)
                 {
                     Debug.Log("YOU WIN");
-                    if (sceneSwapper != null) sceneSwapper.SceneSwapper("Win Scene");
+                    sceneSwapper.SceneSwapper("Win Scene");
                     break;
+                }
+
+                // FIXED: Flags tracker so division calculations do not cycle infinitely
+                if (moveCount <= rageTime && !hasTriggeredRage)
+                {
+                    hasTriggeredRage = true;
+                    bulletInterval /= 3f;
                 }
 
                 if (enemyCollider != null) enemyCollider.enabled = true;
@@ -58,6 +78,8 @@ public class Enemy : MonoBehaviour
                 int randomNumber = Random.Range(0, 3);
                 moveCount--;
                 MoveCounter(moveCount);
+
+                if (token.IsCancellationRequested) break;
 
                 if (randomNumber == 0) 
                 {
@@ -73,7 +95,7 @@ public class Enemy : MonoBehaviour
         }
         catch (System.OperationCanceledException)
         {
-            // Clean exit when task is cancelled or object is destroyed
+            // Clean runtime thread extraction
         }
     }
 
@@ -91,9 +113,19 @@ public class Enemy : MonoBehaviour
         
         await Awaitable.WaitForSecondsAsync(0.2f, token);
 
+        if (token.IsCancellationRequested || sceneSwapper == null) return;
+
         if (_bulletPrefab != null && _offset != null)
         {
-            Instantiate(_bulletPrefab, _offset.position, transform.rotation);
+            GameObject bulletObj = Instantiate(_bulletPrefab, _offset.position, transform.rotation);
+            
+            Bullet bulletComponent = bulletObj.GetComponent<Bullet>();
+            if (bulletComponent != null)
+            {
+                // Dynamically fetch and pass the calculated structural tracking speeds
+                float selectedSpeed = hasTriggeredRage ? rageBulletSpeed : normalBulletSpeed;
+                bulletComponent.SetBulletSpeed(selectedSpeed);
+            }
         }
     }
 
@@ -102,17 +134,18 @@ public class Enemy : MonoBehaviour
         if (enemyAnimator != null) enemyAnimator.SetTrigger("isTPMelee");
         
         await Awaitable.WaitForSecondsAsync(0.3f, token);
+        if (token.IsCancellationRequested || sceneSwapper == null) return;
 
         if (enemyTransform != null) enemyTransform.localPosition = new Vector3(4.6f, 0f, 0f);
         
         await Awaitable.WaitForSecondsAsync(0.75f, token);
+        if (token.IsCancellationRequested || sceneSwapper == null) return;
         
         if (enemyTransform != null) enemyTransform.localPosition = new Vector3(0f, 0f, 0f);
     }
 
     private void OnDestroy()
     {
-        // Safety feature: stops the async loop instantly if the Enemy dies/is destroyed
         if (_loopCancellationTokenSource != null)
         {
             _loopCancellationTokenSource.Cancel();

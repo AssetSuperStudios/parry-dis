@@ -6,17 +6,34 @@ public class Bullet : MonoBehaviour
     [SerializeField] private float lifeTime = 10.0f;
     
     private Rigidbody2D rb;
+    private bool velocityInitialized = false;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();    
         
-        // CRITICAL CRASH FIX: Move via velocity instead of transform.Translate
-        if (rb != null)
+        if (!velocityInitialized && rb != null)
         {
-            rb.linearVelocity = transform.right * movementSpeed;
+            ApplyPhysicsVelocity();
         }
 
         Destroy(gameObject, lifeTime);
+    }
+
+    public void SetBulletSpeed(float newSpeed)
+    {
+        movementSpeed = newSpeed;
+        
+        if (rb == null) rb = GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            ApplyPhysicsVelocity();
+        }
+    }
+
+    private void ApplyPhysicsVelocity()
+    {
+        rb.linearVelocity = transform.right * movementSpeed;
+        velocityInitialized = true;
     }
 }

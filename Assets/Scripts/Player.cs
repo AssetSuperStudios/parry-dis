@@ -1,7 +1,10 @@
+using System.Collections;
+using System.Collections.Generic; // Added for tracking processed bullets
+using System.Security.Cryptography;
+using TMPro;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine.UI;
 
 public class Player : MonoBehaviour
@@ -29,10 +32,9 @@ public class Player : MonoBehaviour
     [SerializeField] private float blinkIntervalMs = 100f; 
 
     [Header("UI Feedback")]
-    [SerializeField] private Text feedbackText; 
-    [SerializeField] private float textDisplayDuration = 0.5f;
-    [SerializeField] private Text hpText; 
-    
+    [SerializeField] private TMP_Text feedbackText; 
+    [SerializeField] private float textDisplayDuration = 1.5f;
+    [SerializeField] private TMP_Text hpText; 
     [Header("Scenes")]
     [SerializeField] private SceneSwap sceneSwapper;
     
@@ -57,10 +59,13 @@ public class Player : MonoBehaviour
     private int failScore = 0;
     private int missScore = -50; 
 
+    private CanvasGroup canvasGroup;
+
     void Start()
     {
         playerAnimator = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        canvasGroup = feedbackText.GetComponent<CanvasGroup>();
         if (feedbackText != null) feedbackText.text = ""; 
 
         if (playerTransform == null) playerTransform = this.transform;
@@ -122,7 +127,7 @@ public class Player : MonoBehaviour
 
         if (!registeredParryHitInWindow)
         {
-            ShowFeedbackText("Miss!", Color.black);
+            ShowFeedbackText("Miss!", Color.black, canvasGroup);
             if (score != null)
             {
                 score.playerScore += missScore;
@@ -181,11 +186,13 @@ public class Player : MonoBehaviour
                 greatCount++;
             }
         }
-        
+
+        // --- DISPLAY UI FEEDBACK AND SAFE SCORE PROCESSING ---
         if (safeCount > 0)
         {
             registeredParryHitInWindow = true;
-            ShowFeedbackText("SAFE PARRY!", Color.red);
+            ShowFeedbackText("SAFE!", Color.red, canvasGroup);
+            Debug.Log($"Safe Parry: {safeCount}");
             if (score != null)
             {
                 score.playerScore += (safeScore * safeCount);
@@ -195,7 +202,8 @@ public class Player : MonoBehaviour
         else if (perfectCount > 0)
         {
             registeredParryHitInWindow = true;
-            ShowFeedbackText("PERFECT PARRY!", Color.yellow);
+            ShowFeedbackText("PERFECT!", Color.yellow, canvasGroup);
+            Debug.Log($"Perfect Parry: {perfectCount}");
             if (score != null)
             {
                 score.playerScore += (perfectScore * perfectCount);
@@ -205,7 +213,8 @@ public class Player : MonoBehaviour
         else if (greatCount > 0)
         {
             registeredParryHitInWindow = true;
-            ShowFeedbackText("GOOD PARRY!", Color.orange);
+            ShowFeedbackText("GOOD!", Color.orange, canvasGroup);
+            Debug.Log($"Good Parry: {greatCount}");
             if (score != null)
             {
                 score.playerScore += (greatScore * greatCount);
@@ -293,21 +302,9 @@ public class Player : MonoBehaviour
 
     void GameLose()
     {
-        ShowFeedbackText("YOU LOST", Color.black);
         if (sceneSwapper != null)
         {
             sceneSwapper.SceneSwapper("Lose Scene");
-        }
-    }
-
-    void ShowFeedbackText(string message, Color color)
-    {
-        if (feedbackText != null)
-        {
-            feedbackText.text = message;
-            feedbackText.color = color;
-            StopCoroutine(ClearFeedbackText());
-            StartCoroutine(ClearFeedbackText());
         }
     }
 
@@ -315,6 +312,26 @@ public class Player : MonoBehaviour
     {
         yield return new WaitForSeconds(textDisplayDuration);
         if (feedbackText != null) feedbackText.text = "";
+    }
+
+    void ShowFeedbackText(string message, Color textColor, CanvasGroup canvasGroup)
+    {
+        if (feedbackText != null) 
+        {
+            canvasGroup.alpha = 1;
+            feedbackText.text = message;
+            feedbackText.color = textColor;
+            StopCoroutine(ClearFeedbackText());
+            StartCoroutine(ClearTextRoutine(canvasGroup));
+        }
+
+    }
+
+    IEnumerator ClearTextRoutine(CanvasGroup canvasGroup)
+    {
+        yield return new WaitForSeconds(textDisplayDuration);
+        feedbackText.text = "";
+        canvasGroup.alpha = 0;
     }
 
     IEnumerator HurtBlinkRoutine()

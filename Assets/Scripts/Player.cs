@@ -266,6 +266,7 @@ public class Player : MonoBehaviour
         }
         
         hpCounter--;
+        GetComponent<AudioSource>().Play();
         
         switch (hpCounter)
         {

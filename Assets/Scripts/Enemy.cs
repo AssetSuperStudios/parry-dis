@@ -42,7 +42,7 @@ public class Enemy : MonoBehaviour
         enemyCollider = GetComponent<Collider2D>();
         audioSources = GetComponents<AudioSource>();
 
-        moveCount = 6;
+        moveCount = 15;
         rageTime = 5; // Fixed naming tracking bug
         MoveCounter(moveCount);
 
